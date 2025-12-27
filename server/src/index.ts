@@ -13,7 +13,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use(express.json());
 
 // Extend Express Request to include user
@@ -57,7 +60,17 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
 app.post('/api/auth/signup', async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   console.log('Signup attempt:', { name, email });
+  
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+  
   try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already registered' });
+    }
+    
     const user = new User({ name, email, password });
     await user.save();
     console.log('User created successfully');
@@ -71,19 +84,30 @@ app.post('/api/auth/signup', async (req: Request, res: Response) => {
 app.post('/api/auth/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
   console.log('Login attempt:', email);
+  
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+  
   try {
     const user = await User.findOne({ email });
-    if (user && await bcrypt.compare(password, user.password)) {
-      const token = jwt.sign({ userId: user._id, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
-      console.log('Login successful');
-      res.json({ token, name: user.name });
-    } else {
-      console.log('Invalid credentials');
-      res.status(401).json({ error: 'Invalid credentials' });
+    if (!user) {
+      console.log('User not found:', email);
+      return res.status(401).json({ error: 'Invalid email or password' });
     }
+    
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      console.log('Invalid password for:', email);
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    
+    const token = jwt.sign({ userId: user._id, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
+    console.log('Login successful for:', email);
+    res.json({ token, name: user.name });
   } catch (err: any) {
     console.error('Login error:', err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error. Please try again.' });
   }
 });
 
