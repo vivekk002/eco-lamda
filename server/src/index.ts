@@ -56,6 +56,15 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
   });
 };
 
+// Health Check Route
+app.get('/', (req: Request, res: Response) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'EcoStudy AI Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Auth Routes
 app.post('/api/auth/signup', async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
