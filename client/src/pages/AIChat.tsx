@@ -27,8 +27,9 @@ const AIChat: React.FC = () => {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/chat/history', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('eco-token')}` }
+      const token = localStorage.getItem('eco-token');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/chat/history`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(res.data.reverse());
     } catch (err) {
@@ -43,8 +44,9 @@ const AIChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/chat', { question: q }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('eco-token')}` }
+      const token = localStorage.getItem('eco-token');
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, { question: q }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setMessages(prev => [...prev, { question: q, answer: res.data.answer, createdAt: new Date().toISOString() }]);
     } catch (err) {

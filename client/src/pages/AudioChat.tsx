@@ -36,8 +36,9 @@ const AudioChat: React.FC = () => {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/chat/history', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('eco-token')}` }
+      const token = localStorage.getItem('eco-token');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/chat/history`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setTranscripts(res.data.filter((c: any) => c.type === 'audio').reverse());
     } catch (err) { console.error(err); }
@@ -46,8 +47,9 @@ const AudioChat: React.FC = () => {
   const handleVoiceInput = async (text: string) => {
     setIsLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/chat', { question: text, type: 'audio' }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('eco-token')}` }
+      const token = localStorage.getItem('eco-token');
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/chat`, { question: text, type: 'audio' }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       const answer = res.data.answer;
       setTranscripts(prev => [...prev, { question: text, answer, createdAt: new Date().toISOString() }]);

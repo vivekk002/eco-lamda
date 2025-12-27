@@ -26,7 +26,7 @@ const SummaryTips: React.FC = () => {
     const fetchTips = async () => {
       try {
         const token = localStorage.getItem('eco-token');
-        const res = await axios.get('http://localhost:5000/api/tips', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/tips`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTips(res.data);
