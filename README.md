@@ -13,6 +13,7 @@ EcoStudy AI is a modern web application designed to help students master complex
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React** (Vite)
 - **TypeScript**
 - **Tailwind CSS**
@@ -20,6 +21,7 @@ EcoStudy AI is a modern web application designed to help students master complex
 - **Lucide React** (icons)
 
 ### Backend
+
 - **Node.js & Express**
 - **MongoDB & Mongoose**
 - **Google Gemini API**
@@ -28,17 +30,20 @@ EcoStudy AI is a modern web application designed to help students master complex
 ## 📦 Setup & Installation
 
 ### Prerequisites
+
 - Node.js (v18+)
 - MongoDB Atlas account
 - Gemini API Key
 
 ### 1. Clone the Repository
+
 ```bash
-git clone <repository-url>
+git clone https://github.com/vivekk002/eco-lamda.git
 cd assignment1
 ```
 
 ### 2. Backend Setup
+
 1. Navigate to the `server` directory:
    ```bash
    cd server
@@ -60,6 +65,7 @@ cd assignment1
    ```
 
 ### 3. Frontend Setup
+
 1. Navigate to the `client` directory:
    ```bash
    cd ../client
