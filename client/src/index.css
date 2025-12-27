@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply transition-colors duration-300;
+  }
+  body.light {
+    @apply bg-focus-bg text-gray-900;
+  }
+  body.dark {
+    @apply bg-focus-dark text-gray-100;
+  }
+}
+
+.deep-card {
+  @apply rounded-3xl border transition-all duration-300;
+}
+
+.light .deep-card {
+  @apply bg-white border-focus-border shadow-deep;
+}
+
+.dark .deep-card {
+  @apply bg-focus-surfacedark border-focus-borderdark shadow-deep-dark;
+}
+
+/* Custom Scrollbar for Deep Focus */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full dark:bg-gray-700;
+}
