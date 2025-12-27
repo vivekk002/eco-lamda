@@ -1,3 +1,4 @@
+
 <div align="center">
 
 # 🧠 EcoStudy AI
@@ -66,37 +67,67 @@ Ask anything about Oligopolies and get precise, sourced answers.
 
 ## 🏗️ System Architecture
 
-┌─────────────────┐
-│ Student Query │
-└────────┬────────┘
-│
-▼
-┌─────────────────────────────┐
-│ Context Retrieval Layer │ ← Extracts relevant PDF sections
-└────────┬────────────────────┘
-│
-▼
-┌─────────────────────────────┐
-│ Prompt Engineering Layer │ ← Injects curriculum context
-└────────┬────────────────────┘
-│
-▼
-┌─────────────────────────────┐
-│ Gemini 1.5 Flash (LLM) │ ← Generates grounded response
-└────────┬────────────────────┘
-│
-▼
-┌─────────────────────────────┐
-│ Response with Sources │
-└─────────────────────────────┘
+```
+                           ┌──────────────────────┐
+                           │   Student Query      │
+                           │  (Text/Voice Input)  │
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+                           ┌──────────────────────┐
+                           │  Context Retrieval   │
+                           │       Layer          │
+                           │                      │
+                           │ -  PDF Chunking       │
+                           │ -  Semantic Search    │
+                           │ -  Relevance Scoring  │
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+                           ┌──────────────────────┐
+                           │  Prompt Engineering  │
+                           │       Layer          │
+                           │                      │
+                           │ -  Context Injection  │
+                           │ -  System Instructions│
+                           │ -  Temperature Control│
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+                           ┌──────────────────────┐
+                           │   Gemini 1.5 Flash   │
+                           │       (LLM)          │
+                           │                      │
+                           │ -  Text Generation    │
+                           │ -  Reasoning Engine   │
+                           │ -  Source Attribution │
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+                           ┌──────────────────────┐
+                           │  Response Formatter  │
+                           │                      │
+                           │ -  Markdown Format    │
+                           │ -  Source Citations   │
+                           │ -  Audio Output       │
+                           └──────────┬───────────┘
+                                      │
+                                      ▼
+                           ┌──────────────────────┐
+                           │   User Interface     │
+                           │  (Chat/Voice Mode)   │
+                           └──────────────────────┘
+```
 
-text
+### Architecture Components
 
-**Key Components:**
-
-1. **Ingestion Pipeline:** Preprocesses PDFs and video transcripts into structured knowledge chunks
-2. **RAG Engine:** Retrieves relevant context before generating responses
-3. **AI Layer:** Gemini 1.5 Flash provides fast, accurate answers with educational formatting
+| Component | Description | Technology |
+| --- | --- | --- |
+| **Ingestion Pipeline** | Preprocesses PDFs and video transcripts into structured knowledge chunks | Python, PDF.js |
+| **RAG Engine** | Retrieves relevant context before generating responses | Custom retrieval algorithm |
+| **AI Layer** | Gemini 1.5 Flash provides fast, accurate answers with educational formatting | Google Gemini API |
+| **Authentication** | Secure user management and session handling | JWT, Bcrypt |
+| **Database** | Stores user data, chat history, and curriculum metadata | MongoDB Atlas |
 
 ---
 
@@ -130,34 +161,34 @@ Before you begin, ensure you have:
 
 #### 1. Clone the Repository
 
+```
 git clone https://github.com/vivekk002/eco-lamda.git
 cd assignment1
-
-text
+```
 
 #### 2. Backend Configuration
 
 Navigate to the server directory and install dependencies:
 
+```
 cd server
 npm install
-
-text
+```
 
 Create a `.env` file in the `/server` directory:
 
+```
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 GEMINI_API_KEY=your_gemini_api_key
 JWT_SECRET=your_secure_random_string
-
-text
+```
 
 Start the backend server:
 
+```
 npm run dev
-
-text
+```
 
 The backend will run on `http://localhost:5000`
 
@@ -165,24 +196,131 @@ The backend will run on `http://localhost:5000`
 
 Open a new terminal and navigate to the client directory:
 
+```
 cd ../client
 npm install
-
-text
+```
 
 Start the development server:
 
+```
 npm run dev
-
-text
+```
 
 #### 4. Access the Application
 
 Open your browser and navigate to:
 
+```
 http://localhost:5173
+```
 
-text
+---
+
+## 📂 Project Structure
+
+```
+eco-lamda/
+│
+├── client/                          # React Frontend Application
+│   ├── public/                      # Static assets
+│   │   ├── index.html
+│   │   └── favicon.ico
+│   │
+│   ├── src/
+│   │   ├── components/              # Reusable React components
+│   │   │   ├── Chat/
+│   │   │   │   ├── ChatInterface.tsx
+│   │   │   │   ├── MessageBubble.tsx
+│   │   │   │   └── InputBox.tsx
+│   │   │   │
+│   │   │   ├── Voice/
+│   │   │   │   ├── VoiceTutor.tsx
+│   │   │   │   └── AudioControls.tsx
+│   │   │   │
+│   │   │   ├── Video/
+│   │   │   │   ├── VideoSummary.tsx
+│   │   │   │   └── TimelineView.tsx
+│   │   │   │
+│   │   │   └── Auth/
+│   │   │       ├── Login.tsx
+│   │   │       └── Register.tsx
+│   │   │
+│   │   ├── pages/                   # Page-level components
+│   │   │   ├── Home.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   └── Profile.tsx
+│   │   │
+│   │   ├── services/                # API integration services
+│   │   │   ├── api.ts               # Axios configuration
+│   │   │   ├── authService.ts       # Authentication APIs
+│   │   │   └── chatService.ts       # Chat/AI APIs
+│   │   │
+│   │   ├── hooks/                   # Custom React hooks
+│   │   │   ├── useAuth.ts
+│   │   │   └── useChat.ts
+│   │   │
+│   │   ├── utils/                   # Utility functions
+│   │   │   ├── speechRecognition.ts
+│   │   │   └── formatters.ts
+│   │   │
+│   │   ├── types/                   # TypeScript type definitions
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── App.tsx                  # Root component
+│   │   ├── main.tsx                 # Entry point
+│   │   └── index.css                # Global styles
+│   │
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── tailwind.config.js
+│
+├── server/                          # Node.js Backend Application
+│   ├── config/
+│   │   └── database.js              # MongoDB connection setup
+│   │
+│   ├── models/                      # Mongoose schemas
+│   │   ├── User.js                  # User model
+│   │   ├── ChatHistory.js           # Chat history model
+│   │   └── Document.js              # Curriculum document model
+│   │
+│   ├── routes/                      # Express route handlers
+│   │   ├── auth.js                  # Authentication routes
+│   │   ├── chat.js                  # Chat/AI interaction routes
+│   │   └── user.js                  # User profile routes
+│   │
+│   ├── controllers/                 # Business logic controllers
+│   │   ├── authController.js        # Auth logic
+│   │   ├── chatController.js        # AI/RAG logic
+│   │   └── userController.js        # User management logic
+│   │
+│   ├── middleware/                  # Express middlewares
+│   │   ├── auth.js                  # JWT verification
+│   │   ├── errorHandler.js          # Error handling
+│   │   └── validator.js             # Input validation
+│   │
+│   ├── services/                    # External service integrations
+│   │   ├── geminiService.js         # Gemini API integration
+│   │   ├── ragService.js            # RAG pipeline logic
+│   │   └── pdfProcessor.js          # PDF parsing service
+│   │
+│   ├── utils/                       # Helper functions
+│   │   ├── tokenGenerator.js        # JWT utilities
+│   │   └── logger.js                # Logging utility
+│   │
+│   ├── data/                        # Static curriculum data
+│   │   ├── chapter_5_7.pdf
+│   │   └── video_transcripts.json
+│   │
+│   ├── .env                         # Environment variables
+│   ├── server.js                    # Express server entry point
+│   └── package.json
+│
+├── .gitignore
+├── README.md
+└── LICENSE
+```
 
 ---
 
@@ -209,30 +347,6 @@ Instead of generic responses, the system uses:
 - **Stateless JWT:** Reduces database queries during user sessions
 - **Secure Password Hashing:** Bcrypt with 10 salt rounds for user data protection
 - **Token Expiration:** 7-day expiry for security balance
-
----
-
-## 📂 Project Structure
-
-eco-lamda/
-├── client/ # React frontend
-│ ├── src/
-│ │ ├── components/ # React components
-│ │ ├── pages/ # Page components
-│ │ ├── services/ # API services
-│ │ └── App.tsx # Main app component
-│ └── package.json
-│
-├── server/ # Node.js backend
-│ ├── models/ # MongoDB models
-│ ├── routes/ # API routes
-│ ├── controllers/ # Route controllers
-│ ├── middleware/ # Auth & validation
-│ └── server.js # Express server
-│
-└── README.md
-
-text
 
 ---
 
