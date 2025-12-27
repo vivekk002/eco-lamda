@@ -1,42 +1,52 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const dotenv = require('dotenv');
-const { User, Chat, Source } = require('./models');
-const { getGeminiResponse } = require('./geminiService');
+import express, { Request, Response, NextFunction } from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+import { User, Chat, Source } from './models';
+import { getGeminiResponse } from './geminiService';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
 
 app.use(cors());
 app.use(express.json());
 
+// Extend Express Request to include user
+interface AuthRequest extends Request {
+  user?: any;
+}
+
 // DB Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to Atlas MongoDB'))
-  .catch(err => {
-    console.error('MongoDB Connection Error:', err.name);
-    if (err.name === 'MongooseServerSelectionError') {
-      console.error('--------------------------------------------------');
-      console.error('ACTION REQUIRED: IP Whitelisting Needed');
-      console.error('Your server IP is not whitelisted in MongoDB Atlas.');
-      console.error('Whitelist this IP: 152.58.185.71');
-      console.error('Check instructions in the sidebar plan.');
-      console.error('--------------------------------------------------');
-    } else {
-      console.error(err);
-    }
-  });
+const MONGODB_URI = process.env.MONGODB_URI;
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI is not defined');
+} else {
+  mongoose.connect(MONGODB_URI)
+    .then(() => console.log('Connected to Atlas MongoDB'))
+    .catch((err: any) => {
+      console.error('MongoDB Connection Error:', err.name);
+      if (err.name === 'MongooseServerSelectionError') {
+        console.error('--------------------------------------------------');
+        console.error('ACTION REQUIRED: IP Whitelisting Needed');
+        console.error('Your server IP is not whitelisted in MongoDB Atlas.');
+        console.error('Whitelist this IP: 152.58.185.71');
+        console.error('--------------------------------------------------');
+      } else {
+        console.error(err);
+      }
+    });
+}
 
 // Auth Middleware
-const authenticateToken = (req, res, next) => {
+const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (!token) return res.sendStatus(401);
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
     if (err) return res.sendStatus(403);
     req.user = user;
     next();
@@ -44,7 +54,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 // Auth Routes
-app.post('/api/auth/signup', async (req, res) => {
+app.post('/api/auth/signup', async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   console.log('Signup attempt:', { name, email });
   try {
@@ -52,43 +62,43 @@ app.post('/api/auth/signup', async (req, res) => {
     await user.save();
     console.log('User created successfully');
     res.status(201).json({ message: 'User created' });
-  } catch (err) {
+  } catch (err: any) {
     console.error('Signup error:', err);
     res.status(400).json({ error: err.message || 'Signup failed' });
   }
 });
 
-app.post('/api/auth/login', async (req, res) => {
+app.post('/api/auth/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
   console.log('Login attempt:', email);
   try {
     const user = await User.findOne({ email });
     if (user && await bcrypt.compare(password, user.password)) {
-      const token = jwt.sign({ userId: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '24h' });
+      const token = jwt.sign({ userId: user._id, name: user.name }, JWT_SECRET, { expiresIn: '24h' });
       console.log('Login successful');
       res.json({ token, name: user.name });
     } else {
       console.log('Invalid credentials');
       res.status(401).json({ error: 'Invalid credentials' });
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
 // Sources Route
-app.get('/api/sources', authenticateToken, async (req, res) => {
+app.get('/api/sources', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const sources = await Source.find();
     res.json(sources);
-  } catch (err) {
+  } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // Tips Route (Feature B: Video Summaries)
-app.get('/api/tips', authenticateToken, async (req, res) => {
+app.get('/api/tips', authenticateToken, async (req: AuthRequest, res: Response) => {
   res.json([
     { 
       id: 1, 
@@ -98,7 +108,7 @@ app.get('/api/tips', authenticateToken, async (req, res) => {
       caption: 'Firms fear raising prices (elastic demand) and cutting prices (inelastic demand), leading to Price Rigidity.',
       duration: '2:45',
       videoUrl: 'https://www.youtube.com/embed/Ec19ljjvlCI',
-      startTime: 165 // 2:45 is 165 seconds
+      startTime: 165 
     },
     { 
       id: 2, 
@@ -118,7 +128,7 @@ app.get('/api/tips', authenticateToken, async (req, res) => {
       },
       duration: '3:12',
       videoUrl: 'https://www.youtube.com/embed/Z_S0VA4jKes',
-      startTime: 3 // Started at 3s as per user link
+      startTime: 3 
     },
     { 
       id: 3, 
@@ -130,13 +140,13 @@ app.get('/api/tips', authenticateToken, async (req, res) => {
       details: 'Where S_i is the market share of the i-th firm.',
       duration: '1:30',
       videoUrl: 'https://www.youtube.com/embed/Ec19ljjvlCI',
-      startTime: 90 // 1:30 is 90 seconds
+      startTime: 90 
     }
   ]);
 });
 
 // Chat Routes (Private)
-app.post('/api/chat', authenticateToken, async (req, res) => {
+app.post('/api/chat', authenticateToken, async (req: AuthRequest, res: Response) => {
   const { question, type } = req.body;
   const answer = await getGeminiResponse(question);
   
@@ -151,13 +161,13 @@ app.post('/api/chat', authenticateToken, async (req, res) => {
   res.json({ answer });
 });
 
-app.get('/api/chat/history', authenticateToken, async (req, res) => {
+app.get('/api/chat/history', authenticateToken, async (req: AuthRequest, res: Response) => {
   const history = await Chat.find({ userId: req.user.userId }).sort({ createdAt: -1 });
   res.json(history);
 });
 
 // Admin Seed
-app.post('/api/admin/seed', async (req, res) => {
+app.post('/api/admin/seed', async (req: Request, res: Response) => {
     await Source.deleteMany({});
     await Source.create([
       { title: 'Oligopoly Theory PDF', type: 'pdf' },

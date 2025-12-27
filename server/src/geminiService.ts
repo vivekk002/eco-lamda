@@ -1,8 +1,13 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const dotenv = require('dotenv');
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import dotenv from 'dotenv';
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  throw new Error("GEMINI_API_KEY is not defined in the environment variables");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
 
 const GLOBAL_CONTEXT = `
   TOPIC: Economics - Oligopoly
@@ -14,7 +19,7 @@ const GLOBAL_CONTEXT = `
   5. Examples: Supermarkets, Oil industries.
 `;
 
-async function getGeminiResponse(question) {
+export async function getGeminiResponse(question: string): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
     const prompt = `
@@ -36,5 +41,3 @@ async function getGeminiResponse(question) {
     return "I'm having trouble thinking right now. Please check my API key.";
   }
 }
-
-module.exports = { getGeminiResponse };

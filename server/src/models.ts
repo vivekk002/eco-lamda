@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 // User Schema
 const UserSchema = new mongoose.Schema({
@@ -28,8 +28,6 @@ const SourceSchema = new mongoose.Schema({
   url: { type: String }
 }, { timestamps: true });
 
-const User = mongoose.model('User', UserSchema);
-const Chat = mongoose.model('Chat', ChatSchema);
-const Source = mongoose.model('Source', SourceSchema);
-
-module.exports = { User, Chat, Source };
+export const User = mongoose.model('User', UserSchema);
+export const Chat = mongoose.model('Chat', ChatSchema);
+export const Source = mongoose.model('Source', SourceSchema);
